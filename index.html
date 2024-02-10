@@ -24,7 +24,7 @@
     d3.json("./data/data.json").then((data) => {
       chart = new Chart()
         .svgHeight(window.innerHeight - 30)
-        .svgWidth(window.innerWidth - 30)
+        .svgWidth(window.innerWidth - 30) // useless
         .container("#graph-container")
         .guiEnabled(true)
         .data(data)

@@ -45,6 +45,9 @@ class Chart {
     this.calculateProperties();
     this.drawSvgAndWrappers();
     this.drawRects();
+    this.drawCircle();
+    this.drawLine();
+    this.setState({ firstRender: false })
     return this;
   }
 
@@ -84,12 +87,66 @@ class Chart {
       ._add({
         tag: "rect",
         selector: "rect-sample",
-        data: [data]
+        className: "rect-class",
+        data: data
       })
-      .attr("width", chartWidth)
-      .attr("height", chartHeight)
+      .attr("width", chartWidth * 0.1)
+      .attr("height", chartHeight * 0.1)
       .attr("fill", (d) => {
         return d.color
+      })
+      .attr("x", function (d, i) {
+        return i * 50
+      })
+      .attr("y", function (d, i) {
+        return i * 50
+      })
+  }
+
+  drawCircle() {
+    const { chart, data, chartHeight, chartWidth } = this.getState();
+
+    const attrs = this.getState();
+
+    const circleData = [{ x: chartWidth / 2, y: chartHeight / 2 }]
+
+    chart
+      ._add({
+        tag: 'circle',
+        className: 'circle',
+        data: circleData,
+      })
+      .attr("cx", d => {
+        return d.x
+      })
+      .attr("cy", d => {
+        return d.y
+      })
+      .attr("r", '10')
+      .attr('fill', 'orangered')
+  }
+
+  drawLine() {
+    const { chart, data } = this.getState();
+
+    const line = d3.line()
+      .x(d => d.value)
+      .y(d => d.value * 10)
+      .curve(d3.curveMonotoneX);
+
+    const lineData = data;
+
+    chart
+      ._add({
+        tag: 'path',
+        className: 'line',
+        data: [lineData],
+      })
+      .attr('fill', 'none')
+      .attr('stroke-width', '2')
+      .attr('stroke', 'red')
+      .attr('d', (d) => {
+        return line(d);
       })
   }
 
@@ -125,16 +182,6 @@ class Chart {
         "transform",
         "translate(" + calc.chartLeftMargin + "," + calc.chartTopMargin + ")"
       );
-
-    chart
-      ._add({
-        tag: "rect",
-        selector: "rect-sample",
-        data: [data]
-      })
-      .attr("width", chartWidth)
-      .attr("height", chartHeight)
-      .attr("fill", (d) => d.color)
 
     this.setState({ chart, svg })
   }
@@ -191,7 +238,7 @@ class Chart {
 
   addChartGui() {
     const { guiEnabled, firstRender } = this.getState()
-    console.log({ guiEnabled, firstRender })
+    // console.log({ guiEnabled, firstRender })
     if (!guiEnabled || !firstRender) return;
     if (typeof lil == 'undefined') return;
     const gui = new lil.GUI()
@@ -211,7 +258,7 @@ class Chart {
 
       )
       .filter(d => !['guiEnabled', 'firstRender'].includes(d))
-    console.log({ supportedKeys, state })
+    // console.log({ supportedKeys, state })
     supportedKeys.forEach(key => {
       gui.add(state, key).onChange(d => {
         propChanged();
